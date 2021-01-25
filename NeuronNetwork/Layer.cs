@@ -6,20 +6,28 @@ using System.Threading.Tasks;
 
 namespace NeuronNetwork
 {
-    public class Layer
+    public class Layer<T> where T : MathNeuron
     {
-        public List<Neuron> neurons = new List<Neuron>();
-        public Layer next;
+        public List<T> neurons = new List<T>();
+        public Layer<T> next;
+        public Layer<T> previous;
 
         public Layer(int count, int countInput)
         {
             for (int i = 0; i < count; i++)
-                neurons.Add(new Neuron(countInput));
+                if (typeof(T) == typeof(MathNeuron))
+                    neurons.Add((T)new MathNeuron(countInput));
+                else
+                    neurons.Add((T)new Neuron(countInput));
         }
 
-        public Layer(List<Neuron> ns) => neurons = ns;
+        public Layer(List<T> ns) => neurons = ns;
 
-        public void SetNext(Layer l) => next = l;
+        public void SetNext(Layer<T> l)
+        {
+            next = l;
+            l.previous = this;
+        }
 
         public int GetCountElem() => neurons == null ? 0 : neurons.Count;
 
@@ -31,15 +39,23 @@ namespace NeuronNetwork
             return next == null ? res : next.ActivateNeurons(res);
         }
 
-        public Layer GetClone()
+        public Layer<T> GetClone()
         {
             var newNeurons = neurons
                 .Select(x => x.GetClone())
                 .ToList();
-            var res = new Layer(newNeurons);
+            var res = new Layer<T>(newNeurons.Select(x => (T)x).ToList());
             if (next != null)
                 res.SetNext(next.GetClone());
             return res;
+        }
+
+        public Layer<T> End()
+        {
+            var end = this;
+            while(end.next != null)
+                end = end.next;
+            return end;
         }
     }
 }

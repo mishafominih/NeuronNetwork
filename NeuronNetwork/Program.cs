@@ -8,14 +8,15 @@ namespace NeuronNetwork
 {
     class Program
     {
-        const int countNetworks = 5;
         static void Main(string[] args)
         {
-            var networks = new List<NeuralNetwork>();
-            for(int i = 0; i < countNetworks; i++)
-            {
-                networks[i] = new NeuralNetwork(4, new int[] { 96, 96, 96, 4 });
-            }
+            var network = new MathNeuronNetwork(new int[] { 7, 14, 1 });
+            //network.Load("load.txt");
+            network.binaryLearn("BigLearn.txt", 0.1, 100000);
+
+            Console.WriteLine();
+
+            network.Save("load.txt");
 
             Console.ReadKey();
         }

@@ -44,26 +44,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Figure.cs" />
-    <Compile Include="Game.cs" />
-    <Compile Include="Horse.cs" />
-    <Compile Include="King.cs" />
     <Compile Include="Layer.cs" />
-    <Compile Include="Map.cs" />
+    <Compile Include="MathNeuron.cs" />
+    <Compile Include="MathNeuronNetwork.cs" />
     <Compile Include="Neuron.cs" />
     <Compile Include="NeuronNetwork.cs" />
-    <Compile Include="Officer.cs" />
-    <Compile Include="Pawn.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Queen.cs" />
-    <Compile Include="Rand.cs" />
-    <Compile Include="Result.cs" />
-    <Compile Include="Rook.cs" />
-    <Compile Include="Step.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="learn.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

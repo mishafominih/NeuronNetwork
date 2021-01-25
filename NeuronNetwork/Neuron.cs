@@ -7,6 +7,9 @@ using System.Xml.Serialization;
 
 namespace NeuronNetwork
 {
+    /// <summary>
+    /// Базовый, простейший нейрон
+    /// </summary>
     public class Neuron
     {
         private static Random rand = new Random();
@@ -14,21 +17,14 @@ namespace NeuronNetwork
         public Neuron(int count)
         {
             for (int i = 0; i < count; i++)
-                weights.Add(rand.NextDouble() * 2 - 1);
+                weights.Add(
+                    rand.NextDouble()*2-1
+                    );
         }
 
         public Neuron(List<double> w)
         {
             weights = w;
-        }
-
-        public double Activate(List<double> values)
-        {
-            var z = 0.0;
-            for (int i = 0; i < weights.Count; i++)
-                z += values[i] * weights[i];
-            z = z / values.Count;
-            return Math.Sin(z * Math.PI / 2);
         }
 
         public Neuron GetClone()//для обучения
@@ -47,11 +43,25 @@ namespace NeuronNetwork
             return new Neuron(newWeight);
         }
 
-        private double Control(double weight)
+
+        public virtual double Activate(List<double> values)
+        {
+            return Sum(values) / values.Count;
+        }
+
+        protected double Control(double weight)
         {
             if (weight > 1) return 1;
-            if (weight < -1) return -1;
+            if (weight < 0) return 0;
             return weight;
+        }
+
+        protected double Sum(List<double> values)
+        {
+            var z = 0.0;
+            for (int i = 0; i < weights.Count; i++)
+                z += values[i] * weights[i];
+            return z;
         }
     }
 }

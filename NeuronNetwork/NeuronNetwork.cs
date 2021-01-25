@@ -9,35 +9,28 @@ using System.Text;
 
 namespace NeuronNetwork
 {
-    class NeuralNetwork
+    /// <summary>
+    /// Базовая нейронная сеть, использующая любой нейрон и обучение методом потомков
+    /// </summary>
+    public class NeuralNetwork<T> where T : MathNeuron
     {
-        private Layer start;
-        private int count;
-        private int[] lenghts;
+        protected Layer<T> start;
+        protected int count;
+        protected int[] lenghts;
 
-        public NeuralNetwork(int count, int[] lenghts)
+        public NeuralNetwork(int[] lenghts)
         {
-            this.count = count;
+            count = lenghts.Length;
             this.lenghts = lenghts;
             start = newLayer();
         }
 
-        private Layer newLayer()
-        {
-            var res = new Layer(lenghts[0], lenghts[0]);
-            var prevLayer = res;
-            for (int i = 1; i < count; i++)
-            {
-                var t = new Layer(lenghts[i], lenghts[i - 1]);
-                prevLayer.SetNext(t);
-                prevLayer = t;
-            }
-            return res;
-        }
-
         public List<double> Run(List<double> input) => start.ActivateNeurons(input);
 
-        public void Study(string path, double d)
+        /// <summary>
+        /// обучение методом потомков
+        /// </summary>
+        public void Study(string path, double d) 
         {
             var input = new List<List<double>>();
             var output = new List<List<double>>();
@@ -91,7 +84,7 @@ namespace NeuronNetwork
             var lines = File.ReadAllLines(path);
             count = int.Parse(lines[0]);
             var lenghts = new List<int>();
-            var res = new Layer(0, 0);
+            var res = new Layer<T>(0, 0);
             var prev = res;
             for (int i = 1; i < lines.Length; i++)
             {
@@ -99,10 +92,10 @@ namespace NeuronNetwork
                     .Split('|')
                     .Select(x => x.Split(' ')
                         .Select(y => double.Parse(y)).ToList())
-                    .Select(x => new Neuron(x))
+                    .Select(x => typeof(T) == typeof(MathNeuron) ? (T)new MathNeuron(x) : (T)new Neuron(x))
                     .ToList();
                 lenghts.Add(neurons.Count());
-                var layer = new Layer(neurons);
+                var layer = new Layer<T>(neurons);
                 prev.SetNext(layer);
                 prev = layer;
             }
@@ -127,22 +120,36 @@ namespace NeuronNetwork
             this.start = layers.First();
         }
 
-        private static List<Layer> GetClons(Layer layer)
+        protected Layer<T> newLayer()
+        {
+            var res = new Layer<T>(lenghts[1], lenghts[0]);
+            var prevLayer = res;
+            for (int i = 2; i < count; i++)
+            {
+                var t = new Layer<T>(lenghts[i], lenghts[i - 1]);
+                prevLayer.SetNext(t);
+                prevLayer = t;
+            }
+            return res;
+        }
+
+        protected static List<Layer<T>> GetClons(Layer<T> layer)
         {
             var list = Enumerable.Range(0, 5).Select(y => layer.GetClone()).ToList();
             list.Add(layer);
             return list;
         }
 
-        private void GetData(ref List<List<double>> start, ref List<List<double>> end, string path)
+        //загружает данные для обучения из файла
+        protected void GetData(ref List<List<double>> start, ref List<List<double>> end, string path)
         {
             var strs = File.ReadAllLines(path);
             start = GetData(strs, 0);
             end = GetData(strs, 1);
         }
 
-        private static List<List<double>> GetData(string[] strs, int n)
-        {
+        protected static List<List<double>> GetData(string[] strs, int n)
+        {//1 1:0 0
             return strs
                 .Select(x => x.Split(':')[n])
                 .Select(x => x.Split(' '))
@@ -150,9 +157,21 @@ namespace NeuronNetwork
                 .ToList();
         }
 
-        private double Compare(List<double> first, List<double> second)
+        protected double Compare(List<double> first, List<double> second)
         {
             return Math.Abs(first.Sum() - second.Sum());
+        }
+
+        protected List<T> GetAllNeurons()
+        {
+            var res = new List<T>();
+            var layer = start;
+            while(layer != null)
+            {
+                res.AddRange(layer.neurons);
+                layer = layer.next;
+            }
+            return res;
         }
     }
 }
